@@ -80,14 +80,14 @@ class File:
 class Seeder:
   HTTP_HEADERS = {
     "Accept-Encoding": "gzip",
-    "User-Agent": "Deluge 1.3.15"
+    "User-Agent": "Transmission/2.94"
   }
 
   def __init__(self, torrent):
     self.torrent = torrent
-    self.peer_id = "-DE13F0-" + utils.random_id(12)
+    self.peer_id = "-TR2940-" + utils.random_id(12)
     self.download_key = utils.random_id(12)
-    self.port = 12394
+    self.port = 62567
 
   def load_peers(self):
     tracker_url = self.torrent.announce
@@ -108,6 +108,25 @@ class Seeder:
     req = requests.get(tracker_url, params=http_params, 
         headers=self.HTTP_HEADERS)
     self.info = bencoding.decode(req.content)
+
+  def stop(self):
+    tracker_url = self.torrent.announce
+    http_params = {
+      "info_hash": self.torrent.file_hash, 
+      "peer_id": self.peer_id.encode("ascii"),
+      "port": self.port,
+      "uploaded": 0,
+      "downloaded": 0,
+      "left": 0, # 假下载模式:self.torrent.total_size 假上传模式:0
+      "event": "stopped",
+      "key": self.download_key,
+      "compact": 1,
+      "numwant": 200,
+      "supportcrypto": 1,
+      "no_peer_id": 1
+    }
+    req = requests.get(tracker_url, params=http_params, 
+        headers=self.HTTP_HEADERS)
 
   def upload(self):
     tracker_url = self.torrent.announce

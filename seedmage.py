@@ -1,6 +1,6 @@
 import argparse
 import random
-import time
+import time, sys
 
 import torrent
 import utils
@@ -22,7 +22,14 @@ for i in f_list:
       seeder_list.append(seeder)
 
 while True:
-  time.sleep(600)
-  for seeder in seeder_list:
-    seeder.upload()
-    time.sleep(30)
+  try:
+    time.sleep(1800)
+    for seeder in seeder_list:
+      seeder.upload()
+      time.sleep(30)
+  except KeyboardInterrupt:
+    for seeder in seeder_list:
+      seeder.stop()
+      time.sleep(1)
+    print("Bye!")
+    sys.exit()
